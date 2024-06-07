@@ -1,0 +1,51 @@
+Copyright (2024) Databricks, Inc.
+
+This Software includes software developed at Databricks (https://www.databricks.com/) and its use is subject to the included LICENSE file.
+—--
+
+This Software contains code from the following open source projects, licensed under the MIT license:
+
+huggingface/datastes - https://github.com/huggingface/datasets
+Copyright datasets authors
+License - https://github.com/huggingface/datasets/blob/main/LICENSE
+
+huggingface/transformers - https://github.com/huggingface/transformers
+Copyright 2018 the Hugging Face Team. All rights reserved.
+License - https://github.com/huggingface/transformers/blob/main/LICENSE
+
+huggingface/accelerate - https://github.com/huggingface/accelerate
+Copyright accelerate authors
+License - https://github.com/huggingface/accelerate/blob/main/LICENSE
+
+huggingface/peft - https://github.com/huggingface/peft
+Copyright peft authors
+License - https://github.com/huggingface/peft/blob/main/LICENSE
+
+huggingface/trl - https://github.com/huggingface/trl
+Copyright trl authors
+License - https://github.com/huggingface/trl/blob/main/LICENSE
+
+—--
+
+This Software contains code from the following open source projects, licensed under the MIT license:
+
+mlverse/torch - https://github.com/mlverse/torch/tree/main
+Copyright (c) 2020 Daniel Falbel
+License - https://github.com/mlverse/torch/blob/main/LICENSE.md
+
+tqdem/tqdem - https://github.com/tqdm/tqdm
+Copyright (c) 2013 noamraph
+License - https://github.com/tqdm/tqdm/blob/master/LICENCE
+
+timdettmers/bitsandbytes - https://github.com/TimDettmers/bitsandbytes
+Copyright (C) Facebook, Inc. and its affiliates.
+License - https://github.com/TimDettmers/bitsandbytes/blob/main/LICENSE
+
+jgromes/loralib - https://github.com/jgromes/LoRaLib
+Copyright (c) 2017 Jan Gromes
+License - https://github.com/jgromes/LoRaLib/blob/master/license.txt
+
+brentyi/tyro - https://github.com/brentyi/tyro
+Copyright (c) 2022 Brent Yi
+License - https://github.com/brentyi/tyro/blob/main/LICENSE
+
