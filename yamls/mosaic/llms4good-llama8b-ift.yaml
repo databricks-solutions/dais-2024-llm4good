@@ -1,0 +1,168 @@
+name: llm4good-llama3-8b-vegi-ift-lr108
+cluster: r7z22p1
+compute:
+  gpus: 16
+
+image: mosaicml/llm-foundry:2.3.0_cu121_flash2-latest
+integrations:
+  - integration_type: git_repo
+    git_repo: mosaicml/llm-foundry
+    git_branch: release/v0.8.0
+    pip_install: -e .[gpu-flash2,databricks]
+    ssh_clone: false # Should be true if using a private repo
+  - integration_type: mlflow
+    tracking_uri: databricks
+    experiment_name: /Shared/llm4good_trl
+
+command: cd llm-foundry/scripts && python misc/download_model.py http --url
+  https://${HOST_IP}:13579/models/meta-llama/Meta-Llama-3-8B-Instruct --save-dir
+  /local_models/meta-llama/Meta-Llama-3-8B-Instruct --ignore-cert fallback-hf
+  --model meta-llama/Meta-Llama-3-8B-Instruct --token "${HUGGING_FACE_HUB_TOKEN}"
+  && composer train/train.py $PARAMETERS
+
+run_name:
+
+parameters:
+  seed: 17
+  global_seed: 17
+  autoresume: false
+
+  global_train_batch_size: 16
+  device_eval_batch_size: 1
+  device_train_microbatch_size: 1
+  save_num_checkpoints_to_keep: 1
+  precision: amp_bf16
+  data_path: dbfs:/Volumes/msh/rlaif/data/training/ift/mds/
+  data_local: ./local-dataset-cache/
+  #load_path:
+
+  max_seq_len: 8192
+  save_folder: dbfs:/databricks/mlflow-tracking/{mlflow_experiment_id}/{mlflow_run_id}/artifacts/{run_name}/checkpoints
+  dist_timeout: 7200
+  max_duration: 2ep
+  progress_bar: false
+
+  eval_interval: 1ep
+  save_interval: 1ep
+  log_to_console: true
+  python_log_level: debug
+  load_weights_only: true
+  max_split_size_mb: 512
+  save_weights_only: false
+  console_log_interval: 10ba
+
+
+  scheduling:
+    priority: lowest
+    max_retries: 0
+    preemptible: false
+    watchdog_enabled: false
+
+  model:
+    name: hf_causal_lm
+    pretrained: false
+    init_device: mixed
+    use_flash_attention_2: true
+    pretrained_model_name_or_path: /local_models/meta-llama/Meta-Llama-3-8B-Instruct
+  tokenizer:
+    name: /local_models/meta-llama/Meta-Llama-3-8B-Instruct
+    kwargs:
+      model_max_length: ${max_seq_len}
+
+  train_loader:
+    name: finetuning
+    dataset:
+      split: train
+      remote: ${data_path}
+      local: ${data_local}
+      shuffle: true
+      max_seq_len: ${max_seq_len}
+      shuffle_algo: py1e
+      shuffle_seed: 17
+      packing_ratio: auto
+      allow_pad_trimming: false
+      decoder_only_format: true
+    timeout: 0
+    drop_last: false
+    pin_memory: true
+    num_workers: 8
+    prefetch_factor: 2
+    persistent_workers: true
+  eval_loader:
+    name: finetuning
+    dataset:
+      split: val
+      remote: ${data_path}
+      local: ${data_local}
+      shuffle: false
+      max_seq_len: ${max_seq_len}
+      shuffle_algo: py1e
+      shuffle_seed: 17
+      packing_ratio: auto
+      allow_pad_trimming: false
+      decoder_only_format: true
+    timeout: 0
+    drop_last: false
+    eval_first: true
+    pin_memory: false
+    num_workers: 8
+    prefetch_factor: 2
+    persistent_workers: true
+    eval_subset_num_batches: -1
+
+  optimizer:
+    lr: 1.0e-08
+    name: decoupled_lionw
+    betas:
+      - 0.9
+      - 0.95
+    weight_decay: 0
+  scheduler:
+    name: cosine_with_warmup
+    alpha_f: 0
+    t_warmup: 0.02dur
+  algorithms:
+    gradient_clipping:
+      clipping_type: norm
+      clipping_threshold: 1
+
+  loggers:
+    mlflow:
+      tracking_uri: databricks
+      model_registry_uri: databricks-uc
+      model_registry_prefix: msh.rlaif
+
+  callbacks:
+    lr_monitor: {}
+    scheduled_gc:
+      batch_interval: 1000
+    speed_monitor:
+      window_size: 10
+    memory_monitor: {}
+    hf_checkpointer:
+      precision: bfloat16
+      save_folder: dbfs:/databricks/mlflow-tracking/{mlflow_experiment_id}/{mlflow_run_id}/artifacts/{run_name}/checkpoints
+      save_interval: 1ep
+      mlflow_logging_config:
+        task: llm/v1/chat
+        metadata:
+          task: llm/v1/chat
+          pretrained_model_name: meta-llama/Meta-Llama-3-8B-Instruct
+          databricks_model_family: LlamaForCausalLM
+          databricks_model_source: genai-fine-tuning
+          databricks_model_size_parameters: 8b
+      mlflow_registered_model_name: llms4good-ift-v1
+    runtime_estimator: {}
+
+  fsdp_config:
+    verbose: false
+    mixed_precision: PURE
+    state_dict_type: sharded
+    limit_all_gathers: true
+    sharding_strategy: FULL_SHARD
+    activation_cpu_offload: false
+    activation_checkpointing: true
+    activation_checkpointing_reentrant: false
+
+
+

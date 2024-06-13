@@ -1,0 +1,23 @@
+name: llm4good-llama3-8b-vegi
+image: mosaicml/llm-foundry:2.3.0_cu121_flash2-42c2d9a
+gpu_num: 8
+cluster: r7z22p1
+
+run_name:
+scheduling:
+  priority: lowest
+  max_retries: 0
+  preemptible: false
+  watchdog_enabled: false
+
+integrations:
+  - integration_type: git_repo
+    git_repo: mshtelma/llms_for_good
+    git_branch: msh_dev
+    pip_install: -e .
+    path: /workspace/llm4good
+
+command: |
+  cd /workspace/llm4good
+  pip install -r requirements.txt
+  python llmsforgood/eval.py

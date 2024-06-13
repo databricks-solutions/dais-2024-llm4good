@@ -1,0 +1,24 @@
+name: llm4good-llama3-8b-vegi
+image: mosaicml/llm-foundry:2.3.0_cu121_flash2-latest
+gpu_num: 8
+cluster: r14z3
+
+run_name:
+scheduling:
+  priority: lowest
+  max_retries: 0
+  preemptible: false
+  watchdog_enabled: false
+
+integrations:
+  - integration_type: git_repo
+    git_repo: mshtelma/llms_for_good
+    git_branch: msh_dev
+    pip_install: -e .
+    path: /workspace/llm4good
+
+command: |
+  cd /workspace/llm4good
+  pip install -r requirements.txt
+  python llmsforgood/train_ppo.py --download_dataset --dataset_path /Volumes/msh/rlaif/data/hf_prompts_med
+  accelerate launch --config_file yamls/accelerate/zero2.yaml llmsforgood/train_ppo.py --train --batch_size 4 --mini_batch_size 4 --learning_rate 2e-6 
