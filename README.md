@@ -6,6 +6,7 @@ using another LLM to generate feedback.
 
 # The Model Alignment Solution Accelerator V2 
 The Model Alignment Solution Accelerator V2 is available in the [V2 branch](https://github.com/databricks-solutions/dais-2024-llm4good/tree/v2).
+This is the version that was presented at Data+AI Summit 24. 
 
 # Dependencies 
 
